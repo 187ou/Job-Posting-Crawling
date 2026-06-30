@@ -13,8 +13,9 @@ LAYOUT = {
 
 def city_salary_fig(df):
     d = prep_salary_df(df)
+    col = "admin_level_1" if "admin_level_1" in d.columns else "work_area"
     st = (
-        d.groupby("city")
+        d.groupby(col)
         .agg(a=("_salary", "mean"), c=("job_title", "count"))
         .query("c >= 2")
         .sort_values("a", ascending=False)
@@ -30,7 +31,7 @@ def city_salary_fig(df):
         color="a",
         color_continuous_scale="viridis",
         title="各城市平均薪资",
-        labels={"a": "月薪(元)", "city": "城市"},
+        labels={"a": "月薪(元)", col: "城市"},
         text=st["a"].apply(lambda x: f"{x/10000:.1f}万"),
     )
     fig.update_layout(**LAYOUT)
@@ -38,7 +39,8 @@ def city_salary_fig(df):
 
 
 def skill_fig(df):
-    fq = parse_skills_count(df["skills"]).most_common(15)
+    col = "job_tags" if "job_tags" in df.columns else "skills"
+    fq = parse_skills_count(df[col]).most_common(15)
     if not fq:
         return None
     lb, vl = zip(*fq)

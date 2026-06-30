@@ -424,7 +424,7 @@ def print_top_jobs(rows, top_n=10):
         job = r.get("job_title", "")
         comp = r.get("company_name", "")
         sal = r.get("salary_text", "")
-        city = r.get("city", "")
+        city = r.get("admin_level_1", "") or r.get("work_area", "")
 
         # 按显示宽度截断
         job = trunc_by_width(job, CW[0] - 2)
@@ -453,7 +453,7 @@ def print_city_distribution(rows):
     print()
 
     from collections import Counter
-    city_counter = Counter(r.get("city", "未知") for r in data if r.get("city"))
+    city_counter = Counter(r.get("admin_level_1", "未知") for r in data if r.get("admin_level_1"))
     total = sum(city_counter.values())
     bar_colors = [GREEN, CYAN, MAGENTA, YELLOW, WHITE]
 
@@ -474,7 +474,7 @@ def print_skills_top(rows, n=15):
 
     skill_counter = Counter()
     for r in data:
-        for tag in str(r.get("skills", "")).split(","):
+        for tag in str(r.get("job_tags", "")).split(","):
             tag = tag.strip()
             if len(tag) >= 2:
                 skill_counter[tag] += 1

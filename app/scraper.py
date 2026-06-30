@@ -22,12 +22,64 @@ except ImportError:
     HAS_CFFI = False
     import requests as std_requests
 
+# 内部字段名（英文 key，用于代码逻辑和 dict 存储）
 CSV_FIELDS = [
-    "job_title", "salary_text", "salary_min", "salary_max", "salary_avg",
-    "skills", "city", "district", "experience", "education",
-    "company_name", "company_type", "company_size", "industry",
+    "_id",
+    "search_city", "search_job_category_2", "search_job_category_3",
+    "position_id", "company_id", "job_title",
+    "recruiter_name", "recruiter_position",
+    "work_address", "job_description",
+    "company_name", "job_tags", "job_welfare", "company_tags",
+    "work_area", "admin_level_1", "admin_level_2", "admin_level_3",
+    "salary_text", "salary_min", "salary_max", "salary_avg", "salary_real",
+    "publish_date", "experience", "education",
+    "industry", "company_type", "company_size",
+    "lat", "lon", "is_fulltime",
+    "major_requirement_1", "major_requirement_2",
     "keyword", "source", "url",
 ]
+
+# 中文表头映射（写 CSV 时使用）
+CSV_HEADERS_CN = {
+    "_id": "序列号",
+    "search_city": "检索城市",
+    "search_job_category_2": "检索二级职位类别",
+    "search_job_category_3": "检索三级职位类别",
+    "position_id": "岗位id",
+    "company_id": "公司id",
+    "job_title": "岗位名",
+    "recruiter_name": "招聘者名称",
+    "recruiter_position": "招聘者职位",
+    "work_address": "工作地址",
+    "job_description": "岗位描述",
+    "company_name": "公司名称",
+    "job_tags": "岗位标签",
+    "job_welfare": "岗位福利待遇",
+    "company_tags": "公司标签",
+    "work_area": "工作地区",
+    "admin_level_1": "一级行政单位",
+    "admin_level_2": "二级行政单位",
+    "admin_level_3": "三级行政单位",
+    "salary_text": "薪资文本",
+    "salary_min": "最小薪资",
+    "salary_max": "最大薪资",
+    "salary_avg": "平均薪资",
+    "salary_real": "薪资区间",
+    "publish_date": "发布日期",
+    "experience": "工作年限要求",
+    "education": "学历要求",
+    "industry": "公司行业",
+    "company_type": "公司类型",
+    "company_size": "公司规模",
+    "lat": "岗位发布-lat",
+    "lon": "岗位发布-lon",
+    "is_fulltime": "是否全职",
+    "major_requirement_1": "专业相关要求1",
+    "major_requirement_2": "专业相关要求2",
+    "keyword": "搜索关键词",
+    "source": "数据来源",
+    "url": "岗位链接",
+}
 
 
 class Scraper:
@@ -174,7 +226,8 @@ class Scraper:
             csv_file = open(csv_path, "w", encoding="utf-8-sig", newline="")
             csv_writer = csv.DictWriter(csv_file, fieldnames=CSV_FIELDS,
                                         extrasaction="ignore")
-            csv_writer.writeheader()
+            # 写中文表头
+            csv_writer.writerow({f: CSV_HEADERS_CN.get(f, f) for f in CSV_FIELDS})
 
         def _flush():
             nonlocal buf
@@ -223,6 +276,7 @@ class Scraper:
                         continue
                     seen.add(k)
                     d["keyword"] = kw
+                    d["_id"] = total_new + 1  # 行号从 1 开始
                     total_new += 1
                     new += 1
 
@@ -235,7 +289,7 @@ class Scraper:
                             sal_min = s[2]
                         if s[2] > sal_max:
                             sal_max = s[2]
-                    c = d.get("city", "")
+                    c = d.get("admin_level_1", "")
                     if c:
                         city_set.add(c)
                     comp = d.get("company_name", "")
@@ -301,7 +355,7 @@ class Scraper:
         try:
             with open(filepath, "w", encoding="utf-8-sig", newline="") as f:
                 w = csv.DictWriter(f, fieldnames=CSV_FIELDS, extrasaction="ignore")
-                w.writeheader()
+                w.writerow({f: CSV_HEADERS_CN.get(f, f) for f in CSV_FIELDS})
                 w.writerows(self._row_for_csv(d) for d in rows)
             self.last_csv_path = filepath
             return filepath
