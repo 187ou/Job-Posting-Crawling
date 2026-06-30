@@ -1,0 +1,31 @@
+[project]
+name = "python-job-market-analysis"
+version = "2.1.0"
+description = "招聘爬虫与数据分析平台 — 终端交互版 · 智联招聘 · 图表分析"
+requires-python = ">=3.10"
+dependencies = [
+    "requests>=2.31.0",
+    "beautifulsoup4>=4.12.0",
+    "lxml>=5.0.0",
+    "openpyxl>=3.1.0",
+    "pandas>=2.2.0",
+    "plotly>=5.18.0",
+    "kaleido>=0.2.1",
+    "curl-cffi>=0.15.0",
+]
+
+[project.scripts]
+start = "main:main"
+
+[build-system]
+requires = ["setuptools>=75.8", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["app", "app.parsers"]
+
+[tool.uv]
+package = true
+
+[dependency-groups]
+dev = []
